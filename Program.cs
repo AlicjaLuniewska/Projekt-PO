@@ -1,6 +1,10 @@
 ﻿using ProjektPO.Modele;
 using ProjektPO.Wyjatki;
+using ProjektPO.Uslugi;
 
+/// <summary>
+/// Główna część programu demonstracyjnego.
+/// </summary>
 Wyjazd wyjazd = new Wyjazd(
     "Krakow",
     new DateTime(2026, 6, 10),
@@ -47,6 +51,15 @@ try
 
     Console.WriteLine();
     Console.WriteLine($"Calkowity koszt wyjazdu: {wyjazd.ObliczKoszt()} zl");
+    GeneratorTXT generator = new GeneratorTXT();
+    generator.GenerujHarmonogramTXT(wyjazd, "harmonogram.txt");
+    generator.GenerujKosztyTXT(wyjazd, "koszty.txt");
+
+    MenagerPlikow menagerPlikow = new MenagerPlikow();
+    menagerPlikow.ZapiszWyjazd(wyjazd, "wyjazd.txt");
+
+    Console.WriteLine();
+    Console.WriteLine("Pliki zostaly zapisane.");
 }
 catch (HarmonogramException ex)
 {
