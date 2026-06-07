@@ -43,15 +43,22 @@ public class Wyjazd
     /// </summary>
     /// <param name="nowaAktywnosc">Aktywność do dodania.</param>
     /// <exception cref="HarmonogramException">
-    /// Wyjątek zgłaszany, gdy nowa aktywność koliduje z istniejącą aktywnością.
+    /// Wyjątek zgłaszany, gdy nowa aktywność koliduje z istniejącą aktywnością lub wykracza poza ramy wyjazdu.
     /// </exception>
     public void DodajAktywnosc(Aktywnosc nowaAktywnosc)
     {
+        // Walidacja: sprawdzenie ram czasowych całego wyjazdu
+        if (nowaAktywnosc.CzasRozpoczecia < DataRozpoczecia || nowaAktywnosc.CzasZakonczenia > DataZakonczenia)
+        {
+            throw new HarmonogramException($"Nie można dodać '{nowaAktywnosc.Nazwa}'. Aktywność musi zawierać się w terminie wyjazdu ({DataRozpoczecia:d} - {DataZakonczenia:d}).");
+        }
+
+        // Walidacja kolizji czasowych
         foreach (var aktywnosc in aktywnosci)
         {
             if (nowaAktywnosc.CzyKolidujeZ(aktywnosc))
             {
-                throw new HarmonogramException("Ta aktywnosc koliduje z inna aktywnoscia.");
+                throw new HarmonogramException($"Ta aktywność ({nowaAktywnosc.Nazwa}) koliduje czasowo z: {aktywnosc.Nazwa}.");
             }
         }
 
@@ -83,5 +90,29 @@ public class Wyjazd
         return aktywnosci
             .OrderBy(a => a.CzasRozpoczecia)
             .ToList();
+    }
+
+    /// <summary>
+    /// Wyszukuje aktywności po nazwie (ignoruje wielkość liter).
+    /// </summary>
+    public List<Aktywnosc> WyszukajAktywnosci(string fraza)
+    {
+        return aktywnosci
+            .Where(a => a.Nazwa.Contains(fraza, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Usuwa aktywność z harmonogramu na podstawie dokładnej nazwy.
+    /// </summary>
+    public bool UsunAktywnosc(string nazwa)
+    {
+        var doUsuniecia = aktywnosci.FirstOrDefault(a => a.Nazwa.Equals(nazwa, StringComparison.OrdinalIgnoreCase));
+        if (doUsuniecia != null)
+        {
+            aktywnosci.Remove(doUsuniecia);
+            return true;
+        }
+        return false;
     }
 }
